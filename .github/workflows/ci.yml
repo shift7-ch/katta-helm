@@ -65,6 +65,15 @@ jobs:
         run: |
           kubectl apply -f "https://raw.githubusercontent.com/kubernetes/ingress-nginx/${INGRESS_NGINX_VERSION}/deploy/static/provider/kind/deploy.yaml"
           kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=300s
+          # The admission webhook can refuse connections for a while after the controller is ready.
+          for attempt in $(seq 1 30); do
+            if kubectl create ingress webhook-probe --namespace default --class nginx --rule "probe.local/*=probe:80" --dry-run=server > /dev/null; then
+              exit 0
+            fi
+            echo "Waiting for ingress-nginx admission webhook (attempt ${attempt})..."
+            sleep 5
+          done
+          exit 1
 
       - name: Install chart with demo values
         run: helm install katta . --namespace katta --create-namespace -f values-demo.yaml --wait --timeout 20m
