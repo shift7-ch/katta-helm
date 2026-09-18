@@ -1,6 +1,9 @@
 .DS_Store
 .git/
 .github/
+.gitignore
+.idea/
+dist/
 *.swp
 *.tmp
 # Keep environment/example overrides out of the published chart artifact:

@@ -39,10 +39,10 @@ The fastest way to spin up a complete Katta stack — Hub + Keycloak + Postgres 
 minikube addons enable ingress
 
 # deploy
-helm install katta chart \
+helm install katta . \
   --namespace katta \
   --create-namespace \
-  -f chart/values-demo.yaml
+  -f values-demo.yaml
 ```
 
 Expose the ingress controller on `localhost:9090`:
@@ -69,7 +69,7 @@ A post-install Helm hook Job (`<release>-storageprofile-seed`) registers an `S3S
 Assumes a real domain with public DNS and a **pre-existing Traefik ingress controller** in the cluster — this chart only registers `Ingress` and `Middleware` resources against it; it does not install Traefik. Confirm the `IngressClass` you want to use (`kubectl get ingressclass`) and substitute its name below if it isn't `traefik`.
 
 ```bash
-helm install katta chart \
+helm install katta . \
   --namespace katta \
   --create-namespace \
   --wait --timeout 5m \
@@ -160,7 +160,7 @@ When disabled, the chart sets `QUARKUS_OTEL_SDK_DISABLED=true` so the SDK does n
 ## Hub with External PostgreSQL and Keycloak
 
 ```bash
-helm install katta chart \
+helm install katta . \
   --namespace katta \
   --create-namespace \
   --wait --timeout 5m \

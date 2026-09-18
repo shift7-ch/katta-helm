@@ -26,9 +26,9 @@
 # - nginx-ingress addon enabled (`minikube addons enable ingress` etc.).
 #
 # Deploy:
-#   helm install katta chart \
+#   helm install katta . \
 #     --namespace katta --create-namespace \
-#     -f chart/values-demo.yaml
+#     -f values-demo.yaml
 #
 # Port-forward — leave running in a separate terminal:
 #   kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller 9090:80
