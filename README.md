@@ -1,6 +1,8 @@
-# Katta Server Helm Chart
+# Katta Helm
 
 Helm chart for [Katta Server](https://github.com/shift7-ch/katta-server), a downstream fork of Cryptomator Hub.
+
+Extracted with its history from [katta-server](https://github.com/shift7-ch/katta-server).
 
 This chart deploys:
 
