@@ -1,0 +1,7 @@
+# Kind cluster for the demo install in CI, labelled for the kind provider manifest of ingress-nginx.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    labels:
+      ingress-ready: "true"

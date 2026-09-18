@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 4 * * *'
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read # Required for checkout
+
+jobs:
+  lint:
+    name: Lint Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Helm
+        uses: Azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
+
+      - name: Lint chart
+        run: helm lint .
+
+      - name: Render demo values
+        run: helm template katta . -f values-demo.yaml > /dev/null
+
+      - name: Render production values
+        run: >
+          helm template katta . -f values-prod.yaml
+          --set urls.hub.public=https://hub.example.com
+          --set urls.kc.public=https://kc.example.com
+          --set ingress.controller=traefik
+          --set ingress.className=traefik
+          > /dev/null
+
+  install:
+    name: Install Demo on Kind
+    needs: lint
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    env:
+      INGRESS_NGINX_VERSION: controller-v1.15.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Helm
+        uses: Azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
+
+      - name: Create kind cluster
+        uses: helm/kind-action@06c1ae10762d3b9c1644e7fe69596ae519e015a2 # v1.15.0
+        with:
+          config: .github/kind.yaml
+
+      - name: Install ingress-nginx
+        run: |
+          kubectl apply -f "https://raw.githubusercontent.com/kubernetes/ingress-nginx/${INGRESS_NGINX_VERSION}/deploy/static/provider/kind/deploy.yaml"
+          kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=300s
+
+      - name: Install chart with demo values
+        run: helm install katta . --namespace katta --create-namespace -f values-demo.yaml --wait --timeout 20m
+
+      - name: Show state and logs
+        if: ${{ failure() }}
+        run: |
+          kubectl get all,jobs,pvc --namespace katta
+          kubectl get events --namespace katta --sort-by=.lastTimestamp
+          for pod in $(kubectl get pods --namespace katta -o name); do
+            echo "::group::$pod"
+            kubectl logs --namespace katta "$pod" --all-containers --prefix || true
+            echo "::endgroup::"
+          done

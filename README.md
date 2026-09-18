@@ -190,15 +190,31 @@ When pointing Katta Server at an external Keycloak, you must ensure the realm co
 - A `cryptomatorvaults` confidential client with `standard.token.exchange.enabled=true` (required by the Katta token-exchange flow)
 - A `cryptomatorhub-system` service-account client with `realm-admin` and `view-system` roles
 
+## Install from Registry
+
+The chart is published as an OCI artifact at `oci://ghcr.io/shift7-ch/katta-helm/katta-server`. The `values-*.yaml` files are not part of the published chart; pass them from this repository instead:
+
+```bash
+helm install katta oci://ghcr.io/shift7-ch/katta-helm/katta-server \
+  --version 0.1.0 \
+  --namespace katta \
+  --create-namespace \
+  -f https://raw.githubusercontent.com/shift7-ch/katta-helm/v0.1.0/values-demo.yaml
+```
+
+## Release
+
+The chart is versioned independently of Katta Server. To publish a release, set `version` in [`Chart.yaml`](Chart.yaml) and push a matching tag `v<version>`, which runs the [release workflow](.github/workflows/release.yml).
+
 ## Verify Published Chart (Signature + Provenance)
 
-This chart contains an OCI chart signature, which can be verified as follows (assuming chart version `0.1.3`):
+This chart contains an OCI chart signature, which can be verified as follows (assuming chart version `0.1.0`):
 
 ```bash
 cosign verify \
-  --certificate-identity-regexp 'https://github.com/shift7-ch/katta-server/.github/workflows/helm-chart.yml@refs/(heads|tags)/.+' \
+  --certificate-identity-regexp 'https://github.com/shift7-ch/katta-helm/.github/workflows/release.yml@refs/tags/v.+' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  ghcr.io/shift7-ch/charts/katta-server:0.1.3
+  ghcr.io/shift7-ch/katta-helm/katta-server:0.1.0
 ```
 
 You can additionally inspect provenance attestations:
@@ -206,7 +222,10 @@ You can additionally inspect provenance attestations:
 ```bash
 cosign verify-attestation \
   --type https://slsa.dev/provenance/v1 \
-  --certificate-identity-regexp 'https://github.com/shift7-ch/katta-server/.github/workflows/helm-chart.yml@refs/(heads|tags)/.+' \
+  --certificate-identity-regexp 'https://github.com/shift7-ch/katta-helm/.github/workflows/release.yml@refs/tags/v.+' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  ghcr.io/shift7-ch/charts/katta-server:0.1.3
+  ghcr.io/shift7-ch/katta-helm/katta-server:0.1.0
 ```
+
+Charts published before the move to this repository at `ghcr.io/shift7-ch/charts/katta-server` are signed by the
+`https://github.com/shift7-ch/katta-server/.github/workflows/helm-chart.yml` workflow identity instead.
