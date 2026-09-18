@@ -12,6 +12,11 @@
 
 ### Added
 
+- Chart moved to its own repository [katta-helm](https://github.com/shift7-ch/katta-helm) and versioned independently
+  of Katta Server. Published as `oci://ghcr.io/shift7-ch/katta-helm/katta-server`.
+- Hub image defaults to `ghcr.io/shift7-ch/katta-server:latest` (`appVersion: latest`) with
+  `hub.imagePullPolicy: Always` until Katta Server has a release tag.
+
 - Optional bundled MinIO (`minio.enabled`, off by default): single-replica StatefulSet
   with a PVC, plus a `ClusterIP` Service exposing the S3 API (9000) and web console
   (9001).

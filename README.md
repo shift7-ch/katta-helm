@@ -12,7 +12,7 @@ This chart deploys:
 - MinIO (optional, disabled by default — see [Bundled MinIO](#bundled-minio-for-evaluation))
 
 Image repositories are fixed in templates; the core-component tags are overridable per workload:
-- Hub: `ghcr.io/shift7-ch/katta-server:<hub.image.tag>` (defaults to chart `appVersion`)
+- Hub: `ghcr.io/shift7-ch/katta-server:<hub.image.tag>` (defaults to chart `appVersion`, which is `latest` until Katta Server is released; `hub.imagePullPolicy` defaults to `Always` accordingly)
 - Keycloak: `ghcr.io/shift7-ch/keycloak:<keycloak.image.tag>` (default `26.6.2`)
 - PostgreSQL: `postgres:<postgres.image.tag>` (default `17-alpine`)
 - MinIO (StatefulSet + seed-Job setup container, shares one tag): `quay.io/minio/minio:<minio.image.tag>` (default `RELEASE.2025-09-07T16-13-09Z`)

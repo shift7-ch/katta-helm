@@ -73,7 +73,7 @@ coredns:
 
 hub:
   replicas: 1
-  imagePullPolicy: IfNotPresent
+  imagePullPolicy: Always # pull updates of the default `latest` tag
   image:
     tag: "" # defaults to chart appVersion
   service:
