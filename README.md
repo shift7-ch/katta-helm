@@ -60,6 +60,8 @@ Once both commands are running:
 | MinIO console: <http://minio.local.katta.cloud:9090> | `minioadmin` / `minioadmin` |
 | MinIO S3 API: <http://s3.local.katta.cloud:9090> | (used by the seeded storage profile) |
 
+The demo values configure a test license with 5 seats, as Hub otherwise stays in setup mode until a license is provided.
+
 A post-install Helm hook Job (`<release>-storageprofile-seed`) registers an `S3STATIC` storage profile named "Bundled MinIO" pointing at `http://s3.local.katta.cloud:9090`, so vault creation works end-to-end immediately after install. Re-runs are idempotent (the seed Job skips profiles whose name already exists).
 
 **How in-cluster DNS works in demo mode:** the same hostnames the browser uses need to resolve inside the cluster too (MinIO has to fetch Keycloak's OIDC discovery URL, and the issuer it sees must match the browser-facing one). The chart's demo profile sets `coredns.patch.enabled=true`, which runs a post-install hook Job that adds a release-scoped `# BEGIN katta:<release>` / `# END katta:<release>` stanza to `kube-system/coredns`'s Corefile, rewriting `*.local.katta.cloud` queries to the chart's port-translation proxy Service. A matching `pre-delete` Job removes the stanza on `helm uninstall`. CoreDNS's `reload` plugin picks up the change within ~30 s; the apply Job sleeps 45 s as a settling buffer before the storage-profile seed Job runs.

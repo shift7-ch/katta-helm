@@ -30,6 +30,8 @@
 - `cryptomatorvaults` Keycloak client + audience mapper on the `cryptomator` client,
   required for the Katta token-exchange flow. Its secret is auto-generated and surfaced
   to the backend via `HUB_KEYCLOAK_OIDC_CRYPTOMATOR_VAULTS_CLIENT_SECRET`.
+- Test license with 5 seats in `values-demo.yaml`, required since Hub rejects API requests with status 402 until a
+  license is configured.
 - `values-demo.yaml` enabling the full local stack (Hub + Keycloak + Postgres + MinIO +
   seed Job) with fixed demo passwords.
 - `hub.admin.email`, `hub.admin.firstName` and `hub.admin.lastName` for the realm admin user
