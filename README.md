@@ -1,6 +1,6 @@
-# Katta: the secure and easy way to work in teams
+# Katta: transform your S3 storage into a secure, team-friendly workspace with client-side encryption
 
-Katta brings zero-config storage management and zero-knowledge key management for teams and organizations.
+Katta brings zero-config storage management and zero-knowledge key management to teams and organizations.
 
 ## Katta Helm
 
@@ -9,7 +9,7 @@ Helm chart for [Katta Server](https://github.com/shift7-ch/katta-server), a down
 This chart deploys:
 
 - Katta Server (the "Hub" backend, required)
-- Keycloak (optional, enabled by default) — uses the Katta-customized image with the token-exchange SPI
+- Keycloak (optional, enabled by default) — uses the Katta-customized image with the Katta theme; the realm is configured for Keycloak's Standard Token Exchange (V2)
 - PostgreSQL (optional, enabled by default)
 - MinIO (optional, disabled by default — see [Bundled MinIO](#bundled-minio-for-evaluation))
 
