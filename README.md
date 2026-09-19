@@ -1,8 +1,10 @@
-# Katta Helm
+# Katta: the secure and easy way to work in teams
+
+Katta brings zero-config storage management and zero-knowledge key management for teams and organizations.
+
+## Katta Helm
 
 Helm chart for [Katta Server](https://github.com/shift7-ch/katta-server), a downstream fork of Cryptomator Hub.
-
-Extracted with its history from [katta-server](https://github.com/shift7-ch/katta-server).
 
 This chart deploys:
 
@@ -24,7 +26,7 @@ Supported ingress controller templates:
 - `ingress.controller=nginx`
 - `ingress.controller=traefik`
 
-## Quick Start (Local Demo with Bundled MinIO)
+### Quick Start (Local Demo with Bundled MinIO)
 
 The fastest way to spin up a complete Katta stack — Hub + Keycloak + Postgres + MinIO + a pre-seeded storage profile — is via `values-demo.yaml` against any local single-user cluster with the nginx-ingress addon (tested on minikube + Podman).
 
@@ -66,7 +68,7 @@ A post-install Helm hook Job (`<release>-storageprofile-seed`) registers an `S3S
 
 **How in-cluster DNS works in demo mode:** the same hostnames the browser uses need to resolve inside the cluster too (MinIO has to fetch Keycloak's OIDC discovery URL, and the issuer it sees must match the browser-facing one). The chart's demo profile sets `coredns.patch.enabled=true`, which runs a post-install hook Job that adds a release-scoped `# BEGIN katta:<release>` / `# END katta:<release>` stanza to `kube-system/coredns`'s Corefile, rewriting `*.local.katta.cloud` queries to the chart's port-translation proxy Service. A matching `pre-delete` Job removes the stanza on `helm uninstall`. CoreDNS's `reload` plugin picks up the change within ~30 s; the apply Job sleeps 45 s as a settling buffer before the storage-profile seed Job runs.
 
-## Quick Start (Production-shaped, no MinIO, real DNS)
+### Quick Start (Production-shaped, no MinIO, real DNS)
 
 Assumes a real domain with public DNS and a **pre-existing Traefik ingress controller** in the cluster — this chart only registers `Ingress` and `Middleware` resources against it; it does not install Traefik. Confirm the `IngressClass` you want to use (`kubectl get ingressclass`) and substitute its name below if it isn't `traefik`.
 
@@ -87,7 +89,7 @@ Real public DNS handles in-cluster resolution naturally (the chart's port-transl
 Passwords are optional by default. If unset, the chart generates random values and
 prints commands in `helm` notes to retrieve them from Kubernetes Secrets.
 
-### TLS
+#### TLS
 
 `ingress.tls.*` is opt-in. The chart emits Ingress resources without a `spec.tls:` block by default, which is the right choice if Traefik is already configured with a default certificate or wildcard. Three common variants:
 
@@ -106,7 +108,7 @@ The Keycloak realm import is rendered from a dedicated template using:
 - `hub.secrets.cryptomatorvaultsClientSecret` (optional; auto-generated when chart-managed Hub secret is used; required for the Katta token-exchange flow)
 - `hub.admin.*` (realm-level Hub admin user; separate from `keycloak.admin.*` bootstrap user)
 
-## Bundled MinIO (for evaluation)
+### Bundled MinIO (for evaluation)
 
 Set `minio.enabled=true` to deploy a single-replica MinIO StatefulSet with a PVC alongside the Hub.
 
@@ -117,7 +119,7 @@ When `minio.enabled=true` and either `storageProfileSeed.static.enabled=true` or
 3. POSTs a `S3STATIC` storage profile pointing at the bundled MinIO service to the polymorphic `/api/storageprofile/` endpoint (dispatching on the `protocol` discriminator).
 4. Skips seeding any profile whose name already exists on the Hub, so re-runs are idempotent. Profile UUIDs are assigned by the server on creation.
 
-### MinIO ingress exposure
+#### MinIO ingress exposure
 
 MinIO is exposed via ingress only for the hostnames you explicitly configure:
 
@@ -126,7 +128,7 @@ MinIO is exposed via ingress only for the hostnames you explicitly configure:
 
 Leave either blank and that ingress isn't created — the corresponding service is then reachable only in-cluster (or via `kubectl port-forward svc/<release>-service-minio 9001:9001` for the console). The demo serves the S3 API at `http://s3.local.katta.cloud:9090` (its own root host) and the console at `http://minio.local.katta.cloud:9090`.
 
-### MinIO IdP debugging
+#### MinIO IdP debugging
 
 ````shell
 mc alias set helm http://s3.local.katta.cloud:9090 minioadmin minioadmin
