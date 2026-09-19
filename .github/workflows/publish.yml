@@ -1,7 +1,10 @@
-name: Release
+name: Publish
 
 on:
   push:
+    branches:
+      - '**'
+      - '!dependabot/**' # read-only token on pushes by Dependabot
     tags:
       - 'v*'
 
@@ -33,17 +36,23 @@ jobs:
         id: version
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
-          # Tag names can contain shell metacharacters and this value flows into later `run:` interpolations,
-          # so allow only OCI-tag-safe characters and fail fast otherwise.
-          if [[ ! "$version" =~ ^[0-9A-Za-z._-]+$ ]]; then
-            echo "::error::Refusing unsafe version '${version}' derived from tag '${GITHUB_REF_NAME}' (allowed: [0-9A-Za-z._-])" >&2
-            exit 1
-          fi
-          chart_version=$(helm show chart . | sed -n 's/^version: //p')
-          if [[ "$version" != "$chart_version" ]]; then
-            echo "::error::Tag '${GITHUB_REF_NAME}' does not match version '${chart_version}' in Chart.yaml" >&2
-            exit 1
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+            # Tag names can contain shell metacharacters and this value flows into later `run:` interpolations,
+            # so allow only OCI-tag-safe characters and fail fast otherwise.
+            if [[ ! "$version" =~ ^[0-9A-Za-z._-]+$ ]]; then
+              echo "::error::Refusing unsafe version '${version}' derived from tag '${GITHUB_REF_NAME}' (allowed: [0-9A-Za-z._-])" >&2
+              exit 1
+            fi
+            chart_version=$(helm show chart . | sed -n 's/^version: //p')
+            if [[ "$version" != "$chart_version" ]]; then
+              echo "::error::Tag '${GITHUB_REF_NAME}' does not match version '${chart_version}' in Chart.yaml" >&2
+              exit 1
+            fi
+          else
+            # Branch push; derive from commit SHA. SemVer pre-release sorts below any real release;
+            # `-` (not `+`) keeps the tag OCI-compatible.
+            version="0.0.0-${GITHUB_SHA::7}"
           fi
           echo "version=${version}" >> "$GITHUB_OUTPUT"
 
@@ -53,7 +62,7 @@ jobs:
       - name: Package chart
         run: |
           mkdir -p dist
-          helm package . --destination dist
+          helm package . --destination dist --version "${{ steps.version.outputs.version }}"
 
       - name: Login to GHCR
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0

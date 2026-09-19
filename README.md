@@ -206,7 +206,9 @@ helm install katta oci://ghcr.io/shift7-ch/katta-helm/katta-server \
 
 ## Release
 
-The chart is versioned independently of Katta Server. To publish a release, set `version` in [`Chart.yaml`](Chart.yaml) and push a matching tag `v<version>`, which runs the [release workflow](.github/workflows/release.yml).
+The chart is versioned independently of Katta Server. The [publish workflow](.github/workflows/publish.yml) publishes every
+push to a branch as version `0.0.0-<commit>`, using the abbreviated commit SHA. To publish a release, set `version` in
+[`Chart.yaml`](Chart.yaml) and push a matching tag `v<version>`.
 
 ## Verify Published Chart (Signature + Provenance)
 
@@ -214,7 +216,7 @@ This chart contains an OCI chart signature, which can be verified as follows (as
 
 ```bash
 cosign verify \
-  --certificate-identity-regexp 'https://github.com/shift7-ch/katta-helm/.github/workflows/release.yml@refs/tags/v.+' \
+  --certificate-identity-regexp 'https://github.com/shift7-ch/katta-helm/.github/workflows/publish.yml@refs/(heads|tags)/.+' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   ghcr.io/shift7-ch/katta-helm/katta-server:0.1.0
 ```
@@ -224,7 +226,7 @@ You can additionally inspect provenance attestations:
 ```bash
 cosign verify-attestation \
   --type https://slsa.dev/provenance/v1 \
-  --certificate-identity-regexp 'https://github.com/shift7-ch/katta-helm/.github/workflows/release.yml@refs/tags/v.+' \
+  --certificate-identity-regexp 'https://github.com/shift7-ch/katta-helm/.github/workflows/publish.yml@refs/(heads|tags)/.+' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   ghcr.io/shift7-ch/katta-helm/katta-server:0.1.0
 ```
