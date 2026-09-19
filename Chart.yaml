@@ -4,7 +4,7 @@ home: https://github.com/shift7-ch/katta-helm
 icon: https://katta.cloud/katta-logo.png
 description: Helm chart for deploying Katta Server with optional Keycloak, PostgreSQL and MinIO
 type: application
-version: 0.1.0
+version: 1.0.0
 appVersion: "latest"
 kubeVersion: ">=1.27.0-0"
 sources:

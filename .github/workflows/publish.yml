@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "*"
 
 defaults:
   run:
@@ -24,6 +22,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # Full history to count commits for the patch version
 
       - name: Setup Helm
         uses: Azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
@@ -35,26 +35,16 @@ jobs:
         id: version
         run: |
           set -euo pipefail
-          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
-            # Optional `v` prefix, as in `v1.0.0`.
-            version="${GITHUB_REF_NAME#v}"
-            # Tag names can contain shell metacharacters and this value flows into later `run:` interpolations,
-            # so allow only OCI-tag-safe characters and fail fast otherwise.
-            if [[ ! "$version" =~ ^[0-9A-Za-z._-]+$ ]]; then
-              echo "::error::Refusing unsafe version '${version}' derived from tag '${GITHUB_REF_NAME}' (allowed: [0-9A-Za-z._-])" >&2
-              exit 1
-            fi
-            chart_version=$(helm show chart . | sed -n 's/^version: //p')
-            if [[ "$version" != "$chart_version" ]]; then
-              echo "::error::Tag '${GITHUB_REF_NAME}' does not match version '${chart_version}' in Chart.yaml" >&2
-              exit 1
-            fi
-          else
-            # Push to main; derive from commit SHA. SemVer pre-release sorts below any real release;
-            # `-` (not `+`) keeps the tag OCI-compatible.
-            version="0.0.0-${GITHUB_SHA::7}"
+          # Major and minor version from Chart.yaml; patch version is the number of commits since its `version` line
+          # last changed, so setting `version: 1.1.0` publishes 1.1.0 and the following commits 1.1.1, 1.1.2, ...
+          major_minor=$(sed -n 's/^version: *"\{0,1\}\([0-9][0-9]*\.[0-9][0-9]*\)\.[0-9][0-9]*"\{0,1\} *$/\1/p' Chart.yaml)
+          if [[ -z "$major_minor" ]]; then
+            echo "::error::Expected 'version: <major>.<minor>.<patch>' in Chart.yaml" >&2
+            exit 1
           fi
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          base=$(git log -1 --format=%H -G '^version:' -- Chart.yaml)
+          patch=$(git rev-list --count "${base}..HEAD")
+          echo "version=${major_minor}.${patch}" >> "$GITHUB_OUTPUT"
 
       - name: Lint chart
         run: helm lint .
