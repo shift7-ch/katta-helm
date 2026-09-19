@@ -40,11 +40,24 @@ The fastest way to spin up a complete Katta stack — Hub + Keycloak + Postgres 
 # one-off (skip if your cluster already has nginx-ingress)
 minikube addons enable ingress
 
+# wait for the ingress controller to be ready
+kubectl wait -n ingress-nginx --for=condition=ready pod \
+  -l app.kubernetes.io/component=controller --timeout=180s
+
 # deploy
 helm install katta . \
   --namespace katta \
   --create-namespace \
   -f values-demo.yaml
+```
+
+> [!IMPORTANT]
+> The ingress controller must be running **before** `helm install`. The chart looks up the controller's pod IPs at render time to create the port-translation proxy Service (`<release>-ingress-proxy`) that in-cluster DNS for `*.local.katta.cloud` points at. If no controller pods are found, the proxy is silently skipped and Hub fails to reach MinIO (see [Troubleshooting](#troubleshooting-the-local-demo)). If you enabled the ingress addon after installing, re-run `helm upgrade katta . --namespace katta -f values-demo.yaml`.
+
+Verify that the ingress controller has picked up the chart's Ingress resources (the `ADDRESS` column should be populated after a minute or so):
+
+```bash
+kubectl get ingress -n katta
 ```
 
 Expose the ingress controller on `localhost:9090`:
@@ -67,6 +80,51 @@ The demo values configure a test license with 5 seats, as Hub otherwise stays in
 A post-install Helm hook Job (`<release>-storageprofile-seed`) registers an `S3STATIC` storage profile named "Bundled MinIO" pointing at `http://s3.local.katta.cloud:9090`, so vault creation works end-to-end immediately after install. Re-runs are idempotent (the seed Job skips profiles whose name already exists).
 
 **How in-cluster DNS works in demo mode:** the same hostnames the browser uses need to resolve inside the cluster too (MinIO has to fetch Keycloak's OIDC discovery URL, and the issuer it sees must match the browser-facing one). The chart's demo profile sets `coredns.patch.enabled=true`, which runs a post-install hook Job that adds a release-scoped `# BEGIN katta:<release>` / `# END katta:<release>` stanza to `kube-system/coredns`'s Corefile, rewriting `*.local.katta.cloud` queries to the chart's port-translation proxy Service. A matching `pre-delete` Job removes the stanza on `helm uninstall`. CoreDNS's `reload` plugin picks up the change within ~30 s; the apply Job sleeps 45 s as a settling buffer before the storage-profile seed Job runs.
+
+#### Troubleshooting the local demo
+
+When the Hub API returns an error, check the Hub server logs. API error responses include an `error id` that matches the stack trace in the log:
+
+```bash
+kubectl logs -n katta deploy/katta-hub -c hub --since=1h
+```
+
+To show only errors and their root causes (add `-f` to follow while reproducing):
+
+```bash
+kubectl logs -n katta deploy/katta-hub -c hub --since=1h | grep -E "ERROR|Caused by"
+```
+
+Logs of a crashed or restarted container are available with `--previous`. The init containers (`wait-for-postgres`, `wait-for-oidc`) log separately; select them with `-c <name>` if the pod is stuck in `Init`.
+
+**Log files:** Hub writes its log only to stdout; there is no log file inside the container. The container runtime stores that output as files on the Kubernetes node, rotated by the kubelet and deleted together with the pod:
+
+- `/var/log/pods/<namespace>_<pod>_<uid>/<container>/0.log`, e.g. `/var/log/pods/katta_katta-hub-<hash>_<uid>/hub/0.log`
+- `/var/log/containers/<pod>_<namespace>_<container>-<id>.log` (symlinks to the above)
+
+On minikube these live inside the node VM/container; open a shell with `minikube ssh` (use `sudo`, the files are root-only):
+
+```bash
+minikube ssh -- "sudo sh -c 'tail -n 200 /var/log/pods/katta_katta-hub-*/hub/0.log'"
+```
+
+For logs that survive pod deletion, configure an OpenTelemetry/OTLP endpoint for Hub (`hub.metrics.enabled` / `hub.metrics.endpoint` in `values.yaml`) or run a cluster log collector.
+
+**`java.net.UnknownHostException: s3.local.katta.cloud`** (e.g. a 500 on `PUT /api/storage/...`) means in-cluster DNS for the public hostnames isn't working. Check that the proxy Service exists and that the name resolves from inside the cluster:
+
+```bash
+kubectl get svc -n katta katta-ingress-proxy
+```
+
+```bash
+kubectl run dnstest -n katta --rm -i --restart=Never --image=busybox:1.36 -- nslookup s3.local.katta.cloud
+```
+
+If the Service is missing, the ingress controller wasn't running at install time. Make sure it is ready, then re-render the chart:
+
+```bash
+helm upgrade katta . --namespace katta -f values-demo.yaml
+```
 
 ### Quick Start (Production-shaped, no MinIO, real DNS)
 
