@@ -3,10 +3,9 @@ name: Publish
 on:
   push:
     branches:
-      - '**'
-      - '!dependabot/**' # read-only token on pushes by Dependabot
+      - main
     tags:
-      - '**'
+      - "*"
 
 defaults:
   run:
@@ -51,7 +50,7 @@ jobs:
               exit 1
             fi
           else
-            # Branch push; derive from commit SHA. SemVer pre-release sorts below any real release;
+            # Push to main; derive from commit SHA. SemVer pre-release sorts below any real release;
             # `-` (not `+`) keeps the tag OCI-compatible.
             version="0.0.0-${GITHUB_SHA::7}"
           fi

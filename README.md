@@ -207,7 +207,7 @@ helm install katta oci://ghcr.io/shift7-ch/katta-helm/katta-server \
 ## Release
 
 The chart is versioned independently of Katta Server. The [publish workflow](.github/workflows/publish.yml) publishes every
-push to a branch as version `0.0.0-<commit>`, using the abbreviated commit SHA. To publish a release, set `version` in
+push to `main` as version `0.0.0-<commit>`, using the abbreviated commit SHA. To publish a release, set `version` in
 [`Chart.yaml`](Chart.yaml) and push a matching tag `<version>`, optionally with a `v` prefix.
 
 ## Verify Published Chart (Signature + Provenance)
