@@ -6,7 +6,7 @@ on:
       - '**'
       - '!dependabot/**' # read-only token on pushes by Dependabot
     tags:
-      - 'v*'
+      - '**'
 
 defaults:
   run:
@@ -37,6 +37,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            # Optional `v` prefix, as in `v1.0.0`.
             version="${GITHUB_REF_NAME#v}"
             # Tag names can contain shell metacharacters and this value flows into later `run:` interpolations,
             # so allow only OCI-tag-safe characters and fail fast otherwise.
