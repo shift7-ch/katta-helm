@@ -1,12 +1,10 @@
-# Katta: transform your S3 storage into a secure, team-friendly workspace with client-side encryption
+# Katta Helm
 
-Katta brings zero-config storage management and zero-knowledge key management to teams and organizations.
+[![Publish](https://github.com/shift7-ch/katta-helm/actions/workflows/publish.yml/badge.svg)](https://github.com/shift7-ch/katta-helm/actions/workflows/publish.yml)
 
-## Katta Helm
+> [Katta](https://katta.cloud/): transform your S3 storage into a secure, team-friendly workspace with client-side encryption.
 
-Helm chart for [Katta Server](https://github.com/shift7-ch/katta-server), a downstream fork of Cryptomator Hub.
-
-This chart deploys:
+Helm chart for [Katta Server](https://github.com/shift7-ch/katta-server), a downstream fork of Cryptomator Hub. This chart deploys:
 
 - Katta Server (the "Hub" backend, required)
 - Keycloak (optional, enabled by default) — uses the Katta-customized image with the Katta theme; the realm is configured for Keycloak's Standard Token Exchange (V2)
@@ -26,7 +24,7 @@ Supported ingress controller templates:
 - `ingress.controller=nginx`
 - `ingress.controller=traefik`
 
-### Quick Start (Local Demo with Bundled MinIO)
+## Quick Start (Local Demo with Bundled MinIO)
 
 The fastest way to spin up a complete Katta stack — Hub + Keycloak + Postgres + MinIO + a pre-seeded storage profile — is via `values-demo.yaml` against any local single-user cluster with the nginx-ingress addon (tested on minikube + Podman).
 
