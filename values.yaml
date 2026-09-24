@@ -278,6 +278,7 @@ storageProfileSeed:
   sts:
     enabled: false
     profileName: "Bundled MinIO (STS)"
-    bucketPrefix: "katta-sts-"
+    # Also the prefix the MinIO policies restrict bucket creation and access to.
+    bucketPrefix: "katta-"
     # The session tag for role chaining is AWS-only and ignored by MinIO; the Hub defaults it
     # to "Vault". The STS duration is MinIO's default. Neither is configurable here.
