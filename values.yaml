@@ -197,11 +197,21 @@ postgres:
 # auto-register a matching S3STATIC profile in the Hub database.
 minio:
   enabled: false
-  # Image repository is fixed (quay.io/minio/minio); the tag is shared by the MinIO
-  # StatefulSet and the storage-profile seed Job's setup container, so they always run
-  # the exact same MinIO/mc build. Defaults to a version-pinned release (not :latest).
+  # MinIO no longer publishes its images publicly, neither on quay.io nor on Docker Hub,
+  # see https://github.com/shift7-ch/katta-compose/issues/22. alpine/minio republishes the
+  # last community release. Defaults to a version-pinned release (not :latest).
   image:
+    repository: "alpine/minio"
     tag: ""
+  # mc for the setup container of the storage profile seed Job: the server image does not ship
+  # it and MinIO no longer publishes its client image publicly either. The release assets on
+  # GitHub are still available, so the Job downloads the binary and verifies its digest, see
+  # https://github.com/minio/mc/releases/download/<version>/mc.linux-<arch>.<version>.sha256sum
+  mc:
+    version: "RELEASE.2025-08-13T08-35-41Z"
+    sha256:
+      amd64: "01f866e9c5f9b87c2b09116fa5d7c06695b106242d829a8bb32990c00312e891"
+      arm64: "14c8c9616cfce4636add161304353244e8de383b2e2752c0e9dad01d4c27c12c"
   imagePullPolicy: IfNotPresent
   service:
     type: ClusterIP
