@@ -192,7 +192,7 @@ spec:
 
                 echo "Registering OIDC providers..."
                 # Triplets of "<provider-name>:<keycloak-client-id>:<minio-role-policy>".
-                # Provider name = Keycloak client_id by convention so `/state/mc idp openid info
+                # Provider name = Keycloak client_id by convention so `mc idp openid info
                 # local <name>` is easy to reason about.
                 for entry in \
                   "cryptomator:cryptomator:katta_create_bucket_policy" \
@@ -215,7 +215,7 @@ spec:
                 # isn't computed until MinIO has reloaded its config. `--json` skips the
                 # interactive progress UI that needs /dev/tty (which we don't have here).
                 echo "Restarting MinIO to activate the new OIDC providers..."
-                mc --json admin service restart local
+                /state/mc --json admin service restart local
 
                 echo "Waiting for MinIO to come back..."
                 until /state/mc admin info local >/dev/null 2>&1; do
