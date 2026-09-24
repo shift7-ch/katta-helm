@@ -54,7 +54,8 @@ data:
             "s3:GetBucketLocation",
             "s3:GetBucketVersioning",
             "s3:ListBucket",
-            "s3:ListBucketMultipartUploads"
+            "s3:ListBucketMultipartUploads",
+            "s3:ListBucketVersions"
           ],
           "Resource": [
             "arn:aws:s3:::{{ $bucketPrefix }}${jwt:client_id}"
