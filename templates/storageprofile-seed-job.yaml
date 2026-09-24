@@ -2,12 +2,6 @@
 {{- $stsEnabled := .Values.storageProfileSeed.sts.enabled -}}
 {{- $openidEnabled := .Values.minio.openid.enabled -}}
 {{- if and .Values.minio.enabled (or $staticEnabled $stsEnabled) }}
-{{- if and $stsEnabled (ne (default "Vault" .Values.storageProfileSeed.sts.sessionTag) "Vault") }}
-{{- fail "storageProfileSeed.sts.sessionTag other than \"Vault\" is not supported: the Katta Admin CLI does not set the session tag and the Hub defaults it to \"Vault\"." }}
-{{- end }}
-{{- if and $stsEnabled .Values.storageProfileSeed.sts.durationSeconds }}
-{{- fail "storageProfileSeed.sts.durationSeconds is not supported: the Katta Admin CLI has no option for it, see https://github.com/shift7-ch/katta-helm/issues/2." }}
-{{- end }}
 {{- $fullname := include "cryptomator-hub.fullname" . -}}
 {{- $hubReadyUrl := printf "http://%s-service-hub:%v/q/health/ready" $fullname .Values.hub.service.managementPort -}}
 {{- $hubUrl := printf "http://%s-service-hub:%v" $fullname .Values.hub.service.port -}}

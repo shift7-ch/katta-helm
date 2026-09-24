@@ -279,9 +279,5 @@ storageProfileSeed:
     enabled: false
     profileName: "Bundled MinIO (STS)"
     bucketPrefix: "katta-sts-"
-    # AWS-only, MinIO ignores it; the Hub defaults it to "Vault", which the Katta Admin CLI
-    # relies on. Setting anything else is not supported and fails template rendering.
-    sessionTag: "Vault"
-    # Not supported by the Katta Admin CLI, see https://github.com/shift7-ch/katta-helm/issues/2.
-    # Setting it fails template rendering; MinIO's default applies when blank.
-    durationSeconds: ""
+    # The session tag for role chaining is AWS-only and ignored by MinIO; the Hub defaults it
+    # to "Vault". The STS duration is MinIO's default. Neither is configurable here.
