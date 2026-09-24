@@ -42,7 +42,7 @@ spec:
       {{- if $openidEnabled }}
       # MinIO requires one OIDC provider per Keycloak client (its `azp == ClientID`
       # check is strict). This init container:
-      #   1. creates the katta_create_bucket_policy / katta_access_bucket_policy MinIO
+      #   1. creates the katta-createbucketpolicy / katta-accessbucketpolicy MinIO
       #      policies from the policies ConfigMap;
       #   2. registers the `cryptomator`, `cryptomatorhub`, and `cryptomatorvaults`
       #      OIDC providers via `mc idp openid add`;
@@ -185,19 +185,19 @@ spec:
                 echo "All three providers already configured with role ARNs; skipping setup."
               else
                 echo "Creating MinIO policies..."
-                try_mc "policy create katta_create_bucket_policy" \
-                  /state/mc admin policy create local katta_create_bucket_policy /policies/create_bucket_policy.json
-                try_mc "policy create katta_access_bucket_policy" \
-                  /state/mc admin policy create local katta_access_bucket_policy /policies/access_bucket_policy.json
+                try_mc "policy create katta-createbucketpolicy" \
+                  /state/mc admin policy create local katta-createbucketpolicy /policies/create_bucket_policy.json
+                try_mc "policy create katta-accessbucketpolicy" \
+                  /state/mc admin policy create local katta-accessbucketpolicy /policies/access_bucket_policy.json
 
                 echo "Registering OIDC providers..."
                 # Triplets of "<provider-name>:<keycloak-client-id>:<minio-role-policy>".
                 # Provider name = Keycloak client_id by convention so `mc idp openid info
                 # local <name>` is easy to reason about.
                 for entry in \
-                  "cryptomator:cryptomator:katta_create_bucket_policy" \
-                  "cryptomatorhub:cryptomatorhub:katta_create_bucket_policy" \
-                  "cryptomatorvaults:cryptomatorvaults:katta_access_bucket_policy" \
+                  "cryptomator:cryptomator:katta-createbucketpolicy" \
+                  "cryptomatorhub:cryptomatorhub:katta-createbucketpolicy" \
+                  "cryptomatorvaults:cryptomatorvaults:katta-accessbucketpolicy" \
                 ; do
                   name="${entry%%:*}"
                   rest="${entry#*:}"
