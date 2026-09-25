@@ -67,7 +67,7 @@ spec:
             # strict `azp == ClientID` check means we need one provider per Keycloak client.
             # The seed Job's `setup-minio` init container runs `mc idp openid add` for
             # `cryptomator`, `cryptomatorhub`, and `cryptomatorvaults` and creates the
-            # `katta_create_bucket_policy` / `katta_access_bucket_policy` policies.
+            # `katta-createbucketpolicy` / `katta-accessbucketpolicy` policies.
           readinessProbe:
             httpGet:
               path: /minio/health/ready

@@ -198,9 +198,9 @@ mc idp openid ls helm                                                           
 ╰──────────────────────────────────────────────────────────────────────────╯
 mc admin policy list helm
 # ...
-mc admin policy info helm katta_access_bucket_policy                                                                                                                                                                                                                                                                          a05d2a4c
+mc admin policy info helm katta-accessbucketpolicy                                                                                                                                                                                                                                                                          a05d2a4c
 # {
-#  "PolicyName": "katta_access_bucket_policy",
+#  "PolicyName": "katta-accessbucketpolicy",
 # ...
 # }
 ```
