@@ -13,7 +13,7 @@ Helm chart for [Katta Server](https://github.com/shift7-ch/katta-server), a down
 
 Image repositories are fixed in templates; the core-component tags are overridable per workload:
 - Hub: `ghcr.io/shift7-ch/katta-server:<hub.image.tag>` (defaults to chart `appVersion`, which is `latest` until Katta Server is released; `hub.imagePullPolicy` defaults to `Always` accordingly)
-- Keycloak: `ghcr.io/shift7-ch/keycloak:<keycloak.image.tag>` (default `26.6.2`)
+- Keycloak: `ghcr.io/shift7-ch/keycloak:<keycloak.image.tag>` (default `26.7.5`)
 - PostgreSQL: `postgres:<postgres.image.tag>` (default `17-alpine`)
 - MinIO (StatefulSet + seed-Job setup container, shares one tag): `quay.io/minio/minio:<minio.image.tag>` (default `RELEASE.2025-09-07T16-13-09Z`)
 - Storage-profile seed Job: `alpine/curl:8.17.0` (hardcoded)
