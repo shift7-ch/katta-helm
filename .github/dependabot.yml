@@ -10,3 +10,16 @@ updates:
           - "*"
     labels:
       - "ci"
+
+  - package-ecosystem: "docker"
+    directories: # tags written as `{{ .Values… }}` are skipped, Dependabot does not render the chart
+      - "/"
+      - "/templates"
+    schedule:
+      interval: "monthly"
+    groups:
+      docker:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
