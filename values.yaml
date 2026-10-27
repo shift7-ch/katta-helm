@@ -69,7 +69,7 @@ coredns:
     namespace: kube-system       # where the coredns ConfigMap lives
     image:
       repository: alpine/k8s
-      tag: "1.31.0"              # bundles kubectl + yq + awk
+      tag: "1.37.1"              # bundles kubectl + yq + awk
 
 hub:
   replicas: 1
